@@ -31,7 +31,7 @@ model:
 data:
   train:
     type: 's3dis'
-    data_root: 'dataset/s3dis/preprocess'
+    data_root: 'data/preprocess'
     prefix: ['Area_1', 'Area_2', 'Area_3', 'Area_4', 'Area_6']
     suffix: '_inst_nostuff.pth'
     repeat: 20
@@ -44,7 +44,7 @@ data:
     x4_split: True
   test:
     type: 's3dis'
-    data_root: 'dataset/s3dis/preprocess'
+    data_root: 'data/preprocess'
     prefix: 'Area_5'
     suffix: '_inst_nostuff.pth'
     training: False
@@ -65,11 +65,11 @@ dataloader:
 
 optimizer:
   type: 'Adam'
-  lr: 0.004
+  lr: 0.001
 
 fp16: False
 epochs: 20
 step_epoch: 0
 save_freq: 2
-pretrain: './checkpoint/softgroup_s3dis_spconv2.pth'
+pretrain: 'data/finetune_backbone/epoch_20.pth'
 work_dir: ''

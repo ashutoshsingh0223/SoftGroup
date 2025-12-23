@@ -8,3 +8,5 @@ six
 tensorboard
 tensorboardX
 tqdm
+spconv-cu118
+numpy==1.26.4

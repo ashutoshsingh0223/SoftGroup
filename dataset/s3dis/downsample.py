@@ -27,7 +27,7 @@ def random_sample(coords: np.ndarray, colors: np.ndarray, semantic_labels: np.nd
 def get_parser():
     parser = argparse.ArgumentParser(description='downsample s3dis by voxelization')
     parser.add_argument(
-        '--data-dir', type=str, default='./preprocess', help='directory save processed data')
+        '--data-dir', type=str, default='data/preprocess', help='directory save processed data')
     parser.add_argument('--ratio', type=float, default=0.25, help='random downsample ratio')
     parser.add_argument(
         '--voxel-size',

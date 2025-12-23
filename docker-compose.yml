@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  softgroup:
+    build:
+      context: .
+      args:
+          UID: 1168432388
+          GID: 1168400513
+    ipc: host
+    volumes:
+      - .:/softgroup
+    working_dir: /softgroup
+    stdin_open: true
+    tty: true
+    command: bash
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              # To use all GPUs, change to count: all and remove device_ids
+              device_ids: ["1"]
+              capabilities: [gpu]

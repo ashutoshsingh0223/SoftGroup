@@ -61,9 +61,19 @@ def read_s3dis_format(area_id: str,
     room_label = ROOM_TYPES[room_type]
     room_dir = osp.join(data_root, area_id, room_name)
     raw_path = osp.join(room_dir, f'{room_name}.txt')
-
+    print(f'Reading room data from {raw_path}')
     room_ver = pd.read_csv(raw_path, sep=' ', header=None).values
+
+    roomver = np.loadtxt(raw_path)
     xyz = np.ascontiguousarray(room_ver[:, 0:3], dtype='float32')
+    # rgb = []
+    # for r in room_ver:
+    #     try:
+    #         rgb.append((r[3:6]).astype(np.uint8))
+    #     except:
+    #         print('error rgb:', r[3:6])
+    # # rgb = np.ascontiguousarray(rgb, dtype='uint8')
+    # # print(room_ver[:, 3:6])
     rgb = np.ascontiguousarray(room_ver[:, 3:6], dtype='uint8')
     if not label_out:
         return xyz, rgb
@@ -101,9 +111,9 @@ def read_s3dis_format(area_id: str,
 def get_parser():
     parser = argparse.ArgumentParser(description='s3dis data prepare')
     parser.add_argument(
-        '--data-root', type=str, default='./Stanford3dDataset_v1.2', help='root dir save data')
+        '--data-root', type=str, default='data/Stanford3dDataset_v1.2', help='root dir save data')
     parser.add_argument(
-        '--save-dir', type=str, default='./preprocess', help='directory save processed data')
+        '--save-dir', type=str, default='data/preprocess', help='directory save processed data')
     parser.add_argument(
         '--patch', action='store_true', help='patch data or not (just patch at first time running)')
     parser.add_argument('--align', action='store_true', help='processing aligned dataset or not')

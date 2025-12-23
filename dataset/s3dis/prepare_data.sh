@@ -1,4 +1,5 @@
 #!/bin/bash
-python prepare_data_inst.py
-python downsample.py
-python prepare_data_inst_gttxt.py
+ 
+python dataset/s3dis/prepare_data_inst.py
+python dataset/s3dis/downsample.py
+python dataset/s3dis/prepare_data_inst_gttxt.py
