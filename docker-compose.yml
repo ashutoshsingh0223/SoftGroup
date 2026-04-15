@@ -14,11 +14,3 @@ services:
     stdin_open: true
     tty: true
     command: bash
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              # To use all GPUs, change to count: all and remove device_ids
-              device_ids: ["1"]
-              capabilities: [gpu]

@@ -1,0 +1,73 @@
+model:
+  in_channels: 1
+  channels: 32
+  num_blocks: 7
+  semantic_classes: 3
+  instance_classes: 3
+  sem2ins_classes: [0, 1]
+  semantic_only: False
+  ignore_label: -100
+  grouping_cfg:
+    score_thr: 0.2
+    radius: 0.004
+    mean_active: 300
+    class_numpoint_mean: [139778, 582861, 11334]
+    npoint_thr: 0.05  # absolute if class_numpoint == -1, relative if class_numpoint != -1
+    ignore_classes: [0, 1]
+  instance_voxel_cfg:
+    scale: 500 # 2mm
+    spatial_shape: 256
+  train_cfg:
+    max_proposal_num: 200
+    pos_iou_thr: 0.5
+  test_cfg:
+    x4_split: False
+    cls_score_thr: 0.001
+    mask_score_thr: -0.5
+    min_npoint: 100
+    eval_tasks: ['semantic', 'instance']
+  fixed_modules: ['input_conv', 'unet', 'output_layer', 'semantic_linear', 'offset_linear']
+
+data:
+  train:
+    type: 'wheathead_iis'
+    data_root: 'data/wheathead_iis'
+    prefix: ['10', '11', '12']
+    suffix: '.pth'
+    repeat: 5
+    training: True
+    voxel_cfg:
+      scale: 500 # 2mm
+      spatial_shape: [256, 512]
+      max_npoint: 1000000
+      min_npoint: 5000
+  test:
+    type: 'wheathead_iis'
+    data_root: 'data/wheathead_iis'
+    prefix: '9'
+    suffix: '.pth'
+    training: False
+    voxel_cfg:
+      scale: 500
+      spatial_shape: [256, 512]
+      max_npoint: 1000000
+      min_npoint: 5000
+
+dataloader:
+  train:
+    batch_size: 4
+    num_workers: 4
+  test:
+    batch_size: 1
+    num_workers: 1
+
+optimizer:
+  type: 'Adam'
+  lr: 0.0001
+
+fp16: False
+epochs: 512
+step_epoch: 0
+save_freq: 20
+pretrain: ''
+work_dir: ''

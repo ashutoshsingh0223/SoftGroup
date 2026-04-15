@@ -11,7 +11,7 @@ import torch.nn.functional as F
 from ..ops import (ball_query, bfs_cluster, get_mask_iou_on_cluster, get_mask_iou_on_pred,
                    get_mask_label, global_avg_pool, sec_max, sec_min, voxelization,
                    voxelization_idx)
-from ..util import cuda_cast, force_fp32, rle_decode, rle_encode
+from ..util import cuda_cast, force_fp32, rle_decode, rle_encode, get_root_logger
 from .blocks import MLP, ResidualBlock, UBlock
 
 
@@ -113,6 +113,9 @@ class SoftGroup(nn.Module):
     def forward_train(self, batch_idxs, voxel_coords, p2v_map, v2p_map, coords_float, feats,
                       semantic_labels, instance_labels, instance_pointnum, instance_cls,
                       pt_offset_labels, spatial_shape, batch_size, **kwargs):
+        # logger = get_root_logger()
+        # logger.info(torch.unique(instance_labels))
+        # logger.info(torch.unique(instance_cls))
         losses = {}
         if self.with_coords:
             feats = torch.cat((feats, coords_float), 1)
@@ -183,6 +186,7 @@ class SoftGroup(nn.Module):
                 num_pos=mask_loss,
                 num_neg=mask_loss)
 
+        # logger = get_root_logger()
         losses = {}
         proposals_idx = proposals_idx[:, 1].int().cuda()
         proposals_offset = proposals_offset.cuda()
@@ -192,6 +196,7 @@ class SoftGroup(nn.Module):
                                                   instance_pointnum)
 
         # filter out background instances
+
         fg_inds = (instance_cls != self.ignore_label)
         fg_instance_cls = instance_cls[fg_inds]
         fg_ious_on_cluster = ious_on_cluster[:, fg_inds]
@@ -217,14 +222,28 @@ class SoftGroup(nn.Module):
                     assigned_gt_inds[gt_argmax_iou[i]] = i
 
         # compute cls loss. follow detection convention: 0 -> K - 1 are fg, K is bg
+        # logger.info(
+        #     "+++++: instance_classes=%s, instance_cls.shape=%s, fg_instance_cls.shape=%s, instance_labels.shape=%s",
+        #     self.instance_classes,
+        #     instance_cls.shape,
+        #     fg_instance_cls.shape,
+        #     torch.unique(instance_labels).shape,
+        # )
+        # logger.info("-----: ", self.instance_classes, torch.unique(instance_cls), torch.unique(fg_instance_cls))
+        # import sys
+        # sys.exit(0)
         labels = fg_instance_cls.new_full((num_proposals, ), self.instance_classes)
         pos_inds = assigned_gt_inds >= 0
         labels[pos_inds] = fg_instance_cls[assigned_gt_inds[pos_inds]]
+        
+        # logger.info(labels, cls_scores.shape)
         cls_loss = F.cross_entropy(cls_scores, labels)
         losses['cls_loss'] = cls_loss
 
         # compute mask loss
+        # logger = get_root_logger()
         mask_cls_label = labels[instance_batch_idxs.long()]
+        # logger.info(mask_cls_label)
         slice_inds = torch.arange(
             0, mask_cls_label.size(0), dtype=torch.long, device=mask_cls_label.device)
         mask_scores_sigmoid_slice = mask_scores.sigmoid()[slice_inds, mask_cls_label]
@@ -232,6 +251,7 @@ class SoftGroup(nn.Module):
                                     instance_pointnum, ious_on_cluster, self.train_cfg.pos_iou_thr)
         mask_label_weight = (mask_label != -1).float()
         mask_label[mask_label == -1.] = 0.5  # any value is ok
+        # logger.info(mask_scores_sigmoid_slice.shape, mask_label.shape, mask_label_weight.shape)
         mask_loss = F.binary_cross_entropy(
             mask_scores_sigmoid_slice, mask_label, weight=mask_label_weight, reduction='sum')
         mask_loss /= (mask_label_weight.sum() + 1)

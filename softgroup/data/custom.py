@@ -175,11 +175,14 @@ class CustomDataset(Dataset):
         if data is None:
             return None
         xyz, xyz_middle, rgb, semantic_label, instance_label = data
+
         info = self.getInstanceInfo(xyz_middle, instance_label.astype(np.int32), semantic_label)
         inst_num, inst_pointnum, inst_cls, pt_offset_label = info
         coord = torch.from_numpy(xyz).long()
         coord_float = torch.from_numpy(xyz_middle)
         feat = torch.from_numpy(rgb).float()
+        if feat.dim() == 1:
+            feat = feat.unsqueeze(1)
         if self.training:
             feat += torch.randn(feat.size(1)) * 0.1
         semantic_label = torch.from_numpy(semantic_label)

@@ -5,6 +5,7 @@ from .kitti import KITTIDataset
 from .s3dis import S3DISDataset
 from .scannetv2 import ScanNetDataset
 from .stpls3d import STPLS3DDataset
+from .wheathead_iis import WheatheadIISDataset
 
 __all__ = ['S3DISDataset', 'ScanNetDataset', 'build_dataset']
 
@@ -22,6 +23,8 @@ def build_dataset(data_cfg, logger):
         return STPLS3DDataset(**_data_cfg)
     elif data_type == 'kitti':
         return KITTIDataset(**_data_cfg)
+    elif data_type == 'wheathead_iis':
+        return WheatheadIISDataset(**_data_cfg)
     else:
         raise ValueError(f'Unknown {data_type}')
 
