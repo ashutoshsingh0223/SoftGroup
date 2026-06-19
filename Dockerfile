@@ -20,8 +20,7 @@ ARG UID
 ARG GID
 
 RUN groupadd -g ${GID} devuser \
- && useradd -m -u ${UID} -g ${GID} devuser
-
+ && useradd --no-log-init -l -m -u ${UID} -g ${GID} devuser
 
 RUN apt-get update && apt-get install -y python3.10 python3.10-dev python3-pip libsparsehash-dev
 
